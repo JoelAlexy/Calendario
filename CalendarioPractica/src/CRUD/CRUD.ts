@@ -11,7 +11,7 @@ export async function addNota( dato: any) {
     }
 }
 
-export async function deleteNota(fecha: string, id: string) {
+export async function deleteNota( id: string) {
     try {
         await axios.delete(`${BASEURL}/notas/${id}`);
     } catch (error) {

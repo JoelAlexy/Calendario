@@ -57,7 +57,7 @@ onMounted(() => {
   sacarNotas();
   
 })
-watch(() => [props.anio, props.mes], () => {
+watch(() => [listaNotas.value], () => {
   sacarNotas()
 })
 

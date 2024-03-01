@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Nota } from '@/interface/interfaceProps';
+import type { Nota ,propsModal} from '@/interface/interfaceProps';
 import { generateUUID } from '@/utils/generarid'
 import { addNota, deleteNota } from '@/CRUD/CRUD'
 
@@ -10,46 +10,58 @@ const hFin = ref();
 const descripcion = ref();
 
 
-interface props {
-    nota?: Nota
-    visible: boolean
-    modificando?: boolean
+
+const props = defineProps<propsModal>();
+const visibilidad = ref<boolean>(false)
+
+
+const ocultarModal = () => {
+    visibilidad.value = !visibilidad.value
 }
-const props = defineProps<props>();
-const emit = defineEmits(['cerrarModal'])
+// const emit = defineEmits(['cerrarModal'])
 
 
 const crearNota = () => {
+    const nuevaNota: Nota = {
+        fecha: props.fecha,
+        id: generateUUID(),
+        titulo: titulo.value,
+        hInicio: hInicio.value,
+        hFin: hFin.value,
+        descripcion: descripcion.value
+    }
 
+    addNota(nuevaNota)
+    ocultarModal()
 }
 const modificarNota = (nota: Nota) => {
-    titulo.value = nota.titulo
+    titulo.value = 'hshdfa'
     hInicio.value = nota.hInicio
     hFin.value = nota.hFin
     descripcion.value = nota.descripcion
-
 }
 
 </script>
 
 <template>
-    <button>+</button>
-    <div v-if="props.modificando" id="formulario">
+    <button @click="ocultarModal()">+</button>
+    <div v-if="visibilidad" id="formulario">
         <h2>Nueva nota</h2>
-        <label>fecha : {{ props.nota?.fecha }}</label>
+        <label>fecha : {{ props.fecha }}</label>
         <input type="text" v-model="titulo" id="titulo" placeholder="Titulo de la nota">
         <input type="time" v-model="hInicio" id="hInicio">
         <input type="time" v-model="hFin" id="hFin">
         <input type="text" v-model="descripcion" id="descripcion" placeholder="Descripcion de la nota">
         <div class="botones">
 
-            <button v-if="modificando === true"> Modificar </button>
-            <button v-else @click="emit('cerrarModal')">Guardar</button>
+            <button v-if="modificando == true" @click="modificarNota(props.nota!)"> Modificar </button>
+            <button v-else @click="crearNota()">Guardar</button>
+            <button  @click="ocultarModal()">Volver</button>
+
         </div>
 
     </div>
 </template >
-
 
 
 <style scoped > #formulario {
