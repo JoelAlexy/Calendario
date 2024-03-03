@@ -1,77 +1,107 @@
 <script setup lang="ts">
-import {ref, watch} from 'vue'
-import type { Nota, valor } from '@/interface/interfaceProps';
-import modal from '@/components/modalCalendario.vue'
-import { deleteNota } from '@/CRUD/CRUD';
-
-const modalVisible = ref(false)
-const modificando = ref(false)
-const nota= ref<Nota>();
+import { ref } from 'vue'
+import { updateNota } from '@/CRUD/CRUD';
+import type { valor, Nota } from '@/interface/interfaceProps';
+import modalCrear from '@/components/modalCrear.vue'
+import modalModificar from '@/components/modalModificar.vue'
 
 const props = defineProps<valor>()
+const arrastrando = ref<boolean>();
 
-watch(() => [props.notas],() => {
-
-})
-const modificar = () => { 
-  modalVisible.value = true;
-  modificando.value = true
-}
-const eliminarNota = (id:string) => { 
-   deleteNota(id);
-  
+const esFechaDeHoy = (fecha: string) => {
+  const fechaHoy = new Date().toLocaleDateString();
+  return fecha === fechaHoy;
 }
 
+const onDragStart = (event: DragEvent, nota: Nota) => {
+  const notaId = JSON.stringify(nota);
+  event.dataTransfer!.setData('text/plain', notaId);
+}
+
+const onDragOver = (event: DragEvent) => {
+  event.preventDefault();
+  event.dataTransfer!.dropEffect = 'move';
+}
+const onDragEnter = () => {
+  arrastrando.value = true;
+  setTimeout(() => {
+    arrastrando.value = false;
+  }, 5000);
+}
+
+const onDrop = (event: DragEvent, fecha: string) => {
+  event.preventDefault();
+  const nota = event.dataTransfer!.getData('text/plain');
+  const cambio = JSON.parse(nota)
+  cambio.fecha = fecha;
+  updateNota(cambio.id, cambio)
+  // Implementa la lógica para manejar el evento de soltar aquí
+  console.log('Nota soltada:', cambio);
+}
 </script>
 
 <template>
-  <div v-if="props.valor !== '- '" class="contenedor-notas">
+  <div v-if="props.valor !== '- '" :class="[esFechaDeHoy(props.valor!) ? 'hoy' : 'contenedor-notas']"
+    @dragenter="onDragEnter">
     <p> {{ props.valor!.split('/')[0] }} </p>
-    <div v-for="notas in props.notas" :key="notas.id" class="notas" dragable="true">
-      <div class="nota">
-        <div class="nota-content">
-          <strong>Título:</strong> {{ notas.titulo }}<br>
-          <strong>Hora de Inicio:</strong> {{ notas.hInicio }}<br>
-          <strong>Hora de Fin:</strong> {{ notas.hFin }}<br>
-          <strong>Descripción:</strong> {{ notas.descripcion }}<br>
-        </div>
-        <div class="botones">
-          <button @click="modificar()">modificar</button>
-          <button @click="eliminarNota(notas.id)" >eliminar</button>
+    <div v-for="nota in props.notas" 
+    :key="nota.id" class="nota">
+      <div :id="nota.id" 
+      :draggable="true" 
+      @dragstart="($event) =>
+    onDragStart($event, nota)">
+        <strong>Título:</strong> {{ nota.titulo }}<br>
 
-        </div>
+        <strong>Hora de Inicio:</strong> {{ nota.hInicio }}<br>
+        <strong>Hora de Fin:</strong> {{ nota.hFin }}<br>
+        <strong>Descripción:</strong> {{ nota.descripcion }}<br>
+      </div>
+      <div v-if="props.valor !== '- '" class="botones">
+        <modalModificar :nota="nota" />
       </div>
     </div>
-    <modal :nota="nota"  :fecha="props.valor" :visible="modalVisible" :modificando="modificando"/>
+    <div v-if="arrastrando" class="zona-soltar" id="{{props.valor!}}" :draggable="true" @dragover="onDragOver"
+      @drop="($event) => onDrop($event, props.valor!)">
+      <h1>soltar aqui</h1>
+    </div>
+    <modalCrear :fecha="props.valor" />
   </div>
 </template>
 
-<style>
-.contenedor-notas{
-background-color: antiquewhite;
-display: flex;
-flex-flow: column wrap;
-align-items: center;
-min-width: 5em;
-min-height: 10em;
+<style scoped>
+.contenedor-notas {
+  background-color: #d3d3d3;
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+
 }
-.notas {
+
+.hoy {
+  border: dotted blue;
+  background-color: #81c9d6;
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+
+}
+
+.zona-soltar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: red;
+  background-color: #73bce6;
   min-width: 50px;
   min-height: 5rem;
 }
 
 .nota {
-  min-width: 10px;
-  min-height: 100px;
   display: flex;
   flex-flow: column wrap;
+  margin-top: 0.5rem;
   align-items: start;
   background-color: #f7e3ff;
-  border: 1px solid #d0b3f8;
+  border: 1px double #dd91c6;
   border-radius: 8px;
   transition: background-color 0.3s ease;
 }
@@ -80,10 +110,7 @@ min-height: 10em;
   background-color: #e0baff;
 }
 
-.nota-content {
-  font-size: 16px;
-  line-height: 1.6;
-  color: #333;
+.eliminar {
+  background-color: #f94c4c;
 }
-
 </style>

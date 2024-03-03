@@ -1,3 +1,4 @@
+import type { Nota } from "@/interface/interfaceProps";
 import axios from "axios";
 
 export const BASEURL = "http://localhost:3000";
@@ -29,7 +30,7 @@ export async function updateNota( id: string, nuevoDato: any) {
 
 export async function selectAllNota() {
     try {
-        const response = await axios.get(`${BASEURL}/notas`);
+        const response = await axios.get(`${BASEURL}/notas/`);
         return response.data;
     } catch (error) {
         console.error(error);
@@ -38,7 +39,7 @@ export async function selectAllNota() {
 
 export async function selectNota(tabla: string, fecha: string) {
     try {
-        const response = await axios.get(`${BASEURL}/notas/?fecha=${fecha}`);
+        const response = await axios.get(`${BASEURL}/${tabla}/${fecha}`);
         return response.data;
     } catch (error) {
         console.error(error);

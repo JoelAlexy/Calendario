@@ -8,22 +8,22 @@ export interface Props{
 
 export interface Nota { 
     fecha ?:string
-    id: string,
+    id:string,
     titulo: string,
-    hInicio: Date,
-    hFin: Date,
+    hInicio: string,
+    hFin: string,
     descripcion:string
 
     
 }
 export interface valor {
     valor?: string
-    notas: Nota[];
+    notas:Nota[]
 
 }
-export interface propsModal {
-    nota?: Nota
-    visible: boolean
+export interface propsCrear {
     fecha?: string
-    modificando?: boolean
+}
+export interface propsModificar {
+    nota?: Nota
 }
